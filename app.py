@@ -18,7 +18,7 @@ def register_user(username, password):
 
 
 def login_user(username, password):
-    conn = sqlite3.connect('user.db')
+    conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
@@ -30,7 +30,7 @@ def login_user(username, password):
 
 @app.route('/')
 def home():
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
@@ -52,7 +52,7 @@ def login():
         password = request.form['password']
 
         if login_user(username, password):
-            return f"Welcome, {username}!"
+            return redirect(url_for('home'))
         else:
             return "Invalid login."
     
