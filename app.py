@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, request
 import sqlite3
 
 app = Flask(__name__)
@@ -30,7 +30,7 @@ def login_user(username, password):
 
 @app.route('/')
 def home():
-        return redirect(url_for('home'))
+        return render_template(url_for('home.html'))
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
