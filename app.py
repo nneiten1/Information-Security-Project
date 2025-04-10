@@ -10,7 +10,7 @@ def register_user(username, password):
     try:
         cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
-        print("User Registered")
+        return "success"
     except sqlite3.IntegrityError as e:
         if 'UNIQUE constraint failed: users.username' in str(e):
             return "username_exists"
@@ -50,8 +50,7 @@ def register():
             return redirect(url_for('login'))
         elif result == "username_exists":
             return "Username already exists!"
-        else:
-            return "An error occurred in the registration proccess. "
+        
     return render_template('register.html')
 
 
