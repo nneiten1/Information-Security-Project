@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, request
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
@@ -11,8 +11,11 @@ def register_user(username, password):
         cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         print("User Registered")
-    except sqlite3.IntegrityError:
-        print("Username already exists")
+    except sqlite3.IntegrityError as e:
+        if 'UNIQUE constraint failed: users.username' in str(e):
+            return "username_exists"
+        else:
+            return "intrgrity_error"
     finally:
         conn.close()
 
@@ -30,18 +33,25 @@ def login_user(username, password):
 
 @app.route('/')
 def home():
-        return render_template(url_for('home.html'))
+        return render_template('home.html')
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        confirm = request.form['confirm_password']
         
-        if register_user(username, password):
-            return "Registered successfully! <a href='/login'>Login</a>"
+        if password != confirm:
+            return "Passwords do not match!"
+        
+        result = register_user(username, password)
+        if result == "success":
+            return redirect(url_for('login'))
+        elif result == "username_exists":
+            return "Username already exists!"
         else:
-            return "Username is already in use."
+            return "An error occurred in the registration proccess. "
     return render_template('register.html')
 
 
