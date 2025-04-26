@@ -3,19 +3,22 @@ import sqlite3
 
 app = Flask(__name__)
 
-def register_user(username, password):
+def register_user(username, password, phone, email):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
     try:
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        query = f"INSERT INTO USERS (username, password, email, phone) VALUES ('{username}', '{password}', '{phone}', '{email}')"
+        print("Executing query:", query)
+        cursor.execute(query)
         conn.commit()
         return "success"
     except sqlite3.IntegrityError as e:
+        print("IntegrityError:", e)
         if 'UNIQUE constraint failed: users.username' in str(e):
             return "username_exists"
         else:
-            return "intrgrity_error"
+            return "integrity_error"
     finally:
         conn.close()
 
@@ -24,7 +27,9 @@ def login_user(username, password):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
+    print("Executing login query:", query)
+    cursor.execute(query)
     user = cursor.fetchone
 
     conn.close()
@@ -41,11 +46,14 @@ def register():
         username = request.form['username']
         password = request.form['password']
         confirm = request.form['confirm_password']
+        phone = request.form['phone']
+        email = request.form['email']
         
         if password != confirm:
             return "Passwords do not match!"
         
-        result = register_user(username, password)
+        result = register_user(username, password, phone, email)
+        print("Registration result:", result)
         if result == "success":
             return redirect(url_for('login'))
         elif result == "username_exists":
