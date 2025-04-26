@@ -1,16 +1,46 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+import bcrypt
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
+
+def load_key():
+    with open('secret.key', 'rb') as key_file:
+        return key_file.read()
+    
+key = load_key()
+cipher_suite = Fernet(key)
+
+def hash_password(plain_password):
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(plain_password.encode('utf-8'), salt)
+    return hashed
+
+def check_password(plain_password, hashed_password):
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
+
+def encrypt_data(plain_text):
+    return cipher_suite.encrypt(plain_text.encode('utf-8'))
+
+def decrypt_data(encrypted_text):
+    return cipher_suite.decrypt(encrypted_text).decode('utf-8')
+
+
+
 
 def register_user(username, password, phone, email):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
     try:
-        query = f"INSERT INTO USERS (username, password, email, phone) VALUES ('{username}', '{password}', '{phone}', '{email}')"
-        print("Executing query:", query)
-        cursor.execute(query)
+        hashed_password = hash_password(password)
+        encrypt_phone = encrypt_data(phone)
+        encrypt_email = encrypt_data(email)
+
+        cursor.execute("INSERT INTO users (username, password, phone, email) VALUES (?, ?, ?, ?)",
+                       (username, hashed_password, encrypt_phone, encrypt_email)
+        )
         conn.commit()
         return "success"
     except sqlite3.IntegrityError as e:
@@ -27,13 +57,16 @@ def login_user(username, password):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
-    print("Executing login query:", query)
-    cursor.execute(query)
-    user = cursor.fetchone
+    cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+    result = cursor.fetchone()
 
     conn.close()
-    return user is not None
+
+    if result:
+        stored_hashed_password = result[0]
+        return check_password(password, stored_hashed_password)
+    else:
+        return False
 
 
 @app.route('/')
