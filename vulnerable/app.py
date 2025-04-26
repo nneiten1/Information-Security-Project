@@ -30,7 +30,7 @@ def login_user(username, password):
     query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
     print("Executing login query:", query)
     cursor.execute(query)
-    user = cursor.fetchone
+    user = cursor.fetchone()
 
     conn.close()
     return user is not None
