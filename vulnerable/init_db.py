@@ -1,10 +1,8 @@
 import sqlite3
 
-# create or connect to a database file
 conn = sqlite3.connect("users.db")
 cursor = conn.cursor()
 
-# creating table for storing user data
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
