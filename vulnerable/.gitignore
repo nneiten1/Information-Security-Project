@@ -1,0 +1,6 @@
+# .gitignore
+users.db
+__pycache__/
+*.pyc
+*.pyo
+venv/
