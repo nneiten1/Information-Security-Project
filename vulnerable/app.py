@@ -1,14 +1,25 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+import bcrypt
 
 app = Flask(__name__)
+
+def hash_password(plain_password):
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(plain_password.encode('utf-8'), salt)
+    return hashed
+
+def check_password(plain_password, hashed_password):
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
 
 def register_user(username, password, phone, email):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
     try:
-        query = f"INSERT INTO USERS (username, password, email, phone) VALUES ('{username}', '{password}', '{phone}', '{email}')"
+        hashed_password = hash_password(password).decode('utf-8')
+
+        query = f"INSERT INTO USERS (username, password, email, phone) VALUES ('{username}', '{hashed_password}', '{phone}', '{email}')"
         print("Executing query:", query)
         cursor.execute(query)
         conn.commit()
@@ -27,13 +38,15 @@ def login_user(username, password):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
+    query = f"SELECT password FROM users WHERE username = '{username}'"
     print("Executing login query:", query)
     cursor.execute(query)
-    user = cursor.fetchone()
+    result = cursor.fetchone()
 
     conn.close()
-    return user is not None
+    if result:
+        stored_hashed_password = result[0]
+        return check_password(password, stored_hashed_password.encode('utf-8'))
 
 
 @app.route('/')

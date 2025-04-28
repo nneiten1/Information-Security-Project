@@ -1,6 +1,6 @@
 # .gitignore
 secret.key
-users.db
+neitenbachDB.db
 __pycache__/
 *.pyc
 *.pyo
