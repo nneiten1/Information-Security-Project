@@ -1,7 +1,7 @@
 import sqlite3
 
 # create or connect to a database file
-conn = sqlite3.connect("users.db")
+conn = sqlite3.connect("neitenbachDB.db")
 cursor = conn.cursor()
 
 # creating table for storing user data

@@ -13,7 +13,7 @@ def check_password(plain_password, hashed_password):
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
 
 def register_user(username, password, phone, email):
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect('neitenbachDB.db')
     cursor = conn.cursor()
 
     try:
@@ -26,7 +26,7 @@ def register_user(username, password, phone, email):
         return "success"
     except sqlite3.IntegrityError as e:
         print("IntegrityError:", e)
-        if 'UNIQUE constraint failed: users.username' in str(e):
+        if 'UNIQUE constraint failed: neitenbachDB.username' in str(e):
             return "username_exists"
         else:
             return "integrity_error"
@@ -35,7 +35,7 @@ def register_user(username, password, phone, email):
 
 
 def login_user(username, password):
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect('neitenbachDB.db')
     cursor = conn.cursor()
 
     query = f"SELECT password FROM users WHERE username = '{username}'"

@@ -30,7 +30,7 @@ def decrypt_data(encrypted_text):
 
 
 def register_user(username, password, phone, email):
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect('neitenbachDB.db')
     cursor = conn.cursor()
 
     try:
@@ -54,7 +54,7 @@ def register_user(username, password, phone, email):
 
 
 def login_user(username, password):
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect('neitenbachDB.db')
     cursor = conn.cursor()
 
     cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
