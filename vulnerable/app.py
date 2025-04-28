@@ -38,15 +38,13 @@ def login_user(username, password):
     conn = sqlite3.connect('neitenbachDB.db')
     cursor = conn.cursor()
 
-    query = f"SELECT password FROM users WHERE username = '{username}'"
+    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
     print("Executing login query:", query)
     cursor.execute(query)
     result = cursor.fetchone()
 
     conn.close()
-    if result:
-        stored_hashed_password = result[0]
-        return check_password(password, stored_hashed_password.encode('utf-8'))
+    return result is not None
 
 
 @app.route('/')
